@@ -3,12 +3,18 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { ProductsModule } from './products/products.module';
+import { OrdersModule } from './orders/orders.module';
+import { ReportsModule } from './reports/reports.module';
+import {ScheduleModule} from "@nestjs/schedule";
+import { AlertsService } from './alerts/alerts.service';
+import { AlertsModule } from './alerts/alerts.module';
 
 @Module({
     imports: [
         ConfigModule.forRoot({
             isGlobal: true,
         }),
+        ScheduleModule.forRoot(),
         TypeOrmModule.forRootAsync({
             imports: [ConfigModule],
             useFactory: async (configService: ConfigService) => ({
@@ -25,6 +31,10 @@ import { ProductsModule } from './products/products.module';
         }),
         AuthModule,
         ProductsModule,
+        OrdersModule,
+        ReportsModule,
+        AlertsModule,
     ],
+    providers: [AlertsService],
 })
 export class AppModule {}

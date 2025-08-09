@@ -5,17 +5,20 @@ import { Repository } from 'typeorm';
 
 import { CreateProductDto } from './dto/create-product.dto';
 import {Product} from "./entities/product.entity";
+import {Transaction} from "./entities/transaction.entity";
 
 @Injectable()
 export class ProductsService {
   constructor(
       @InjectRepository(Product)
       private productRepository: Repository<Product>,
+      @InjectRepository(Transaction)
+      private transactionRepository: Repository<Transaction>,
   ) {}
 
-  async findAll(): Promise<Product[]> {
-    return this.productRepository.find();
-  }
+  // async findAll(): Promise<Product[]> {
+  //   return this.productRepository.find();
+  // }
 
   async findOne(id: number): Promise<Product> {
     let user = await this.productRepository.findOne({ where: { id } });
@@ -37,5 +40,17 @@ export class ProductsService {
 
   async remove(id: number): Promise<void> {
     await this.productRepository.delete(id);
+  }
+
+  async getProductHistory(id: number): Promise<Transaction[]> {
+    return this.transactionRepository.find({ where: { productId: id } });
+  }
+
+  async findAll(search?: string): Promise<Product[]> {
+    const query = this.productRepository.createQueryBuilder('product');
+    if (search) {
+      query.where('product.name LIKE :search OR product.category LIKE :search', { search: `%${search}%` });
+    }
+    return query.getMany();
   }
 }
