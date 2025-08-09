@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import {User} from "./entities/user.entity";
+import {JwtStrategy} from "./jwt.strategy";
 
 @Module({
   imports: [
@@ -17,7 +18,7 @@ import {User} from "./entities/user.entity";
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService],
-  exports: [AuthService],
+  providers: [AuthService,JwtStrategy],
+  exports: [AuthService,JwtStrategy],
 })
 export class AuthModule {}

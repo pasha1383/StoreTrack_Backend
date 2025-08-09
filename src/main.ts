@@ -11,6 +11,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   // Read the port from .env, defaulting to 3000 if not set
   const port = configService.get<number>('APP_PORT', 3000);
+  console.log("this is port ",port)
 
   app.use(cookieParser());
   app.useGlobalPipes(new ValidationPipe({
