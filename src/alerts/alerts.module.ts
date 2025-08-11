@@ -7,13 +7,14 @@ import {Product} from "../products/entities/product.entity";
 import {OrderItem} from "../orders/entities/order-item.entity";
 import {Report} from "../reports/entities/report.entity";
 import {ReportsService} from "../reports/reports.service";
+import {MailService} from "../mail/mail.service";
 
 @Module({
     imports: [
         ReportsModule,
         TypeOrmModule.forFeature([Product,Report,OrderItem]),
     ],
-    providers: [AlertsService,ReportsService],
+    providers: [AlertsService,ReportsService,MailService],
     exports: [AlertsService],
 })
 export class AlertsModule {}

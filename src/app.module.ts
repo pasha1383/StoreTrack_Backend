@@ -8,6 +8,7 @@ import { ReportsModule } from './reports/reports.module';
 import {ScheduleModule} from "@nestjs/schedule";
 import { AlertsService } from './alerts/alerts.service';
 import { AlertsModule } from './alerts/alerts.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
     imports: [
@@ -34,6 +35,7 @@ import { AlertsModule } from './alerts/alerts.module';
         OrdersModule,
         ReportsModule,
         AlertsModule,
+        MailModule,
     ],
     providers: [AlertsService],
 })

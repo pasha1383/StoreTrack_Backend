@@ -14,7 +14,7 @@ export class ReportsService {
       private orderItemRepository: Repository<OrderItem>,
   ) {}
 
-  async getLowStockProducts(threshold = 10): Promise<Product[]> {
+  async getLowStockProducts(threshold = 2000): Promise<Product[]> {
     return this.productRepository.find({ where: { stock: LessThanOrEqual(threshold) } });
   }
 
