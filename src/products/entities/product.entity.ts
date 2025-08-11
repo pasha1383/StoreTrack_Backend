@@ -1,5 +1,5 @@
 // src/products/product.entity.ts
-import {Entity, PrimaryGeneratedColumn, Column, OneToMany} from 'typeorm';
+import {Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn} from 'typeorm';
 import { Transaction } from './transaction.entity';
 
 @Entity()
@@ -21,4 +21,10 @@ export class Product {
 
     @OneToMany(() => Transaction, transaction => transaction.product)
     transactions: Transaction[];
+
+    @CreateDateColumn()
+    createdAt: Date;
+
+    @UpdateDateColumn()
+    updatedAt: Date;
 }

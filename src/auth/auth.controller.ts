@@ -18,6 +18,6 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async login(@Body() loginDto: LoginDto): Promise<{ token: string }> {
     const token = await this.authService.login(loginDto);
-    return { token };
+    return { token:token };
   }
 }

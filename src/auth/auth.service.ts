@@ -1,5 +1,11 @@
 // src/auth/auth.service.ts
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+  NotAcceptableException,
+  NotFoundException
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -36,13 +42,13 @@ export class AuthService {
     const user = await this.usersRepository.findOne({ where: { email } });
 
     if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new NotFoundException('Invalid credentials');
     }
 
     const isPasswordMatching = await bcrypt.compare(password, user.password);
 
     if (!isPasswordMatching) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new NotAcceptableException('Invalid credentials');
     }
 
     const payload = { sub: user.id, email: user.email };

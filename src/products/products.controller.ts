@@ -14,10 +14,14 @@ export class ProductsController {
     return this.productsService.create(createProductDto);
   }
 
-  // @Get()
-  // findAll() {
-  //   return this.productsService.findAll();
-  // }
+  @Get()
+  findAll(
+      @Query('search') search?: string,
+      @Query('sort') sort?: 'newest' | 'price_asc' | 'price_desc',
+      @Query('category') category?: string,
+  ) {
+    return this.productsService.findAll(search, sort, category);
+  }
 
   @Get(':id')
   findOne(@Param('id',ParseIntPipe) id: number) {
@@ -30,8 +34,11 @@ export class ProductsController {
   }
 
   @Delete(':id')
-  remove(@Param('id',ParseIntPipe) id: number) {
-    return this.productsService.remove(id);
+  async remove(@Param('id',ParseIntPipe) id: number) {
+    await this.productsService.remove(id);
+    return {
+      message: `Product With ID ${id} Deleted`,
+    }
   }
 
   @Get(':id/history')
@@ -40,8 +47,8 @@ export class ProductsController {
   }
 
   @Get()
-  findAll(@Query('search') search: string) {
-    return this.productsService.findAll(search);
+  search(@Query('search') search: string) {
+    return this.productsService.search(search);
   }
 
 }
