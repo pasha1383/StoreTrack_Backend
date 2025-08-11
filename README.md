@@ -1,98 +1,212 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+🚀 StoreTrack Backend API
+Welcome to the StoreTrack backend! This is a modern inventory and order management system built with NestJS, TypeORM, and MySQL. The API provides a robust and secure way to manage products, process orders, and track business insights.
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+✨ Features
+User Authentication: Secure login and registration with JWT.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Product Management: Full CRUD operations for products, including detailed filtering and sorting.
 
-## Description
+Order Processing: Create new orders, manage order statuses, and automatically update stock.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Transaction History: Detailed history for every product's stock movement.
 
-## Project setup
+Reporting: Generate valuable sales and low-stock reports.
 
-```bash
-$ npm install
-```
+Automated Alerts: Receive email notifications for low-stock products via a scheduled cron job.
 
-## Compile and run the project
+Scalability: Containerized with Docker for easy deployment and consistent environments.
 
-```bash
-# development
-$ npm run start
+🛠️ Tech Stack
+Backend: NestJS
 
-# watch mode
-$ npm run start:dev
+Database: MySQL
 
-# production mode
-$ npm run start:prod
-```
+ORM: TypeORM
 
-## Run tests
+Containerization: Docker, Docker Compose
 
-```bash
-# unit tests
-$ npm run test
+Email Service: Nodemailer
 
-# e2e tests
-$ npm run test:e2e
+Task Scheduling: @nestjs/schedule
 
-# test coverage
-$ npm run test:cov
-```
+🚀 Getting Started
+Prerequisites
+Before you begin, ensure you have the following installed on your machine:
 
-## Deployment
+Node.js (version 18 or higher)
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+Docker Desktop
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Setup
+Clone the repository.
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+git clone https://github.com/your-username/store-track-backend.git
+cd store-track-backend
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Create a .env file in the root directory and add your configuration.
 
-## Resources
+DATABASE_HOST=db
+DATABASE_PORT=3306
+DATABASE_USERNAME=root
+DATABASE_PASSWORD=your_db_password
+DATABASE_NAME=storetrack_db
 
-Check out a few resources that may come in handy when working with NestJS:
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USER=your_email@gmail.com
+MAIL_PASSWORD=your_email_app_password
+JWT_SECRET=your_secret_key
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+Note: Make sure to replace the placeholder values with your actual credentials.
 
-## Support
+Start the application using Docker Compose. This command will build the backend image and start the MySQL database.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+docker-compose up
 
-## Stay in touch
+The application will be accessible at http://localhost:3000.
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+🗺️ API Endpoints
+All endpoints are protected and require a valid JWT access token in the Authorization: Bearer <token> header, unless specified otherwise.
 
-## License
+Authentication
+Method
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Endpoint
+
+Description
+
+POST
+
+/auth/register
+
+Register a new user
+
+POST
+
+/auth/login
+
+Log in and receive a JWT token
+
+Products
+Method
+
+Endpoint
+
+Description
+
+GET
+
+/products
+
+Get a list of all products with optional filters.
+
+GET
+
+/products?search=<term>
+
+Search products by name or category.
+
+GET
+
+/products?sort=newest
+
+Get products sorted by newest first.
+
+GET
+
+/products?sort=price_desc
+
+Get products sorted from most expensive to cheapest.
+
+GET
+
+/products?sort=price_asc
+
+Get products sorted from cheapest to most expensive.
+
+GET
+
+/products/:id
+
+Get a single product by ID.
+
+POST
+
+/products
+
+Create a new product.
+
+PUT
+
+/products/:id
+
+Update a product by ID.
+
+DELETE
+
+/products/:id
+
+Delete a product by ID.
+
+GET
+
+/products/:id/history
+
+Get the transaction history for a specific product.
+
+Orders
+Method
+
+Endpoint
+
+Description
+
+POST
+
+/orders
+
+Create a new order.
+
+GET
+
+/orders
+
+Get all orders with optional filters.
+
+GET
+
+/orders?search=<term>
+
+Filter orders by product name.
+
+GET
+
+/orders?startDate=<date>&endDate=<date>
+
+Filter orders by a date range (YYYY-MM-DD).
+
+PATCH
+
+/orders/:id/status
+
+Update the status of an order.
+
+Reports
+Method
+
+Endpoint
+
+Description
+
+GET
+
+/reports/sales
+
+Get a sales report.
+
+GET
+
+/reports/low-stock
+
+Get a list of products with low stock.
+
