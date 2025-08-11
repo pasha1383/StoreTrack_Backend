@@ -1,11 +1,13 @@
 // src/orders/orders.service.ts
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
-import { CreateOrderDto } from './dto/create-order.dto'
+import { Repository, DataSource, Between } from 'typeorm';
+import { CreateOrderDto } from './dto/create-order.dto';
+import { OrderStatus } from './order.status.enum';
 import {Order} from "./entities/order.entity";
-import {Product} from "../products/entities/product.entity";
 import {OrderItem} from "./entities/order-item.entity";
+import {Product} from "../products/entities/product.entity";
+import {Transaction, TransactionType} from "../products/entities/transaction.entity";
 import {UpdateOrderStatusDto} from "./dto/update-order.dto";
 
 @Injectable()
@@ -15,6 +17,10 @@ export class OrdersService {
       private orderRepository: Repository<Order>,
       @InjectRepository(OrderItem)
       private orderItemRepository: Repository<OrderItem>,
+      @InjectRepository(Product) // Inject Product repository to use it directly
+      private productRepository: Repository<Product>,
+      @InjectRepository(Transaction) // Inject Transaction repository
+      private transactionRepository: Repository<Transaction>,
       private dataSource: DataSource,
   ) {}
 
@@ -56,14 +62,48 @@ export class OrdersService {
     }
   }
 
-  async findAll(): Promise<Order[]> {
-    return this.orderRepository.find({ relations: ['orderItems', 'orderItems.product'] });
+  async findAll(search?: string, startDate?: string, endDate?: string): Promise<Order[]> {
+    const queryBuilder = this.orderRepository.createQueryBuilder('order')
+        .leftJoinAndSelect('order.orderItems', 'orderItem')
+        .leftJoinAndSelect('orderItem.product', 'product');
+
+    if (search) {
+      queryBuilder.where('product.name LIKE :search', { search: `%${search}%` });
+    }
+
+    if (startDate && endDate) {
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+
+      if (!dateRegex.test(startDate) || !dateRegex.test(endDate)) {
+        throw new BadRequestException('Invalid date format. Use YYYY-MM-DD.');
+      }
+
+      queryBuilder.andWhere('order.createdAt BETWEEN :startDate AND :endDate', {
+        startDate: new Date(startDate),
+        endDate: new Date(endDate),
+      });
+    }
+
+    return queryBuilder.getMany();
   }
 
   async updateStatus(id: number, updateOrderStatusDto: UpdateOrderStatusDto): Promise<Order> {
-    const order = await this.orderRepository.findOne({ where: { id } });
+    const order = await this.orderRepository.findOne({ where: { id }, relations: ['orderItems', 'orderItems.product'] });
     if (!order) {
       throw new NotFoundException(`Order with ID ${id} not found`);
+    }
+
+    // Check if the status is changing to SHIPPED
+    if (order.status !== OrderStatus.SHIPPED && updateOrderStatusDto.status === OrderStatus.SHIPPED) {
+      for (const orderItem of order.orderItems) {
+        const transaction = this.transactionRepository.create({
+          product: orderItem.product,
+          productId: orderItem.product.id,
+          type: TransactionType.OUT,
+          quantity: orderItem.quantity,
+        });
+        await this.transactionRepository.save(transaction);
+      }
     }
 
     order.status = updateOrderStatusDto.status;

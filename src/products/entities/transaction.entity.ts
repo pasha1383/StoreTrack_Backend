@@ -1,5 +1,5 @@
 // src/products/transaction.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import {Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn} from 'typeorm';
 import { Product } from './product.entity';
 
 export enum TransactionType {
@@ -18,12 +18,12 @@ export class Transaction {
     @Column()
     productId: number;
 
-    @Column('enum', { enum: TransactionType })
+    @Column('enum', { enum: TransactionType ,default:TransactionType.IN })
     type: TransactionType;
 
     @Column()
     quantity: number;
 
-    @Column()
-    timestamp: Date;
+    @CreateDateColumn()
+    createdAt: Date;
 }

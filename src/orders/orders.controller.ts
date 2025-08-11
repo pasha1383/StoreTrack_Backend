@@ -1,5 +1,5 @@
 // src/orders/orders.controller.ts
-import {Controller, Post, Body, Get, UseGuards, Patch, Param, ParseIntPipe, Put} from '@nestjs/common';
+import {Controller, Post, Body, Get, UseGuards, Patch, Param, ParseIntPipe, Put, Query} from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { AuthGuard } from '@nestjs/passport';
@@ -16,8 +16,12 @@ export class OrdersController {
   }
 
   @Get()
-  async findAll() {
-    return this.ordersService.findAll();
+  async findAll(
+      @Query('search') search?: string,
+      @Query('startDate') startDate?: string,
+      @Query('endDate') endDate?: string,
+  ) {
+    return this.ordersService.findAll(search, startDate, endDate);
   }
 
   @Put(':id/status')
