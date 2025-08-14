@@ -9,6 +9,7 @@ import {OrderItem} from "./entities/order-item.entity";
 import {Product} from "../products/entities/product.entity";
 import {Transaction, TransactionType} from "../products/entities/transaction.entity";
 import {UpdateOrderStatusDto} from "./dto/update-order.dto";
+import {AlertsService} from "../alerts/alerts.service";
 
 @Injectable()
 export class OrdersService {
@@ -21,6 +22,7 @@ export class OrdersService {
       private productRepository: Repository<Product>,
       @InjectRepository(Transaction) // Inject Transaction repository
       private transactionRepository: Repository<Transaction>,
+      private alertService:AlertsService,
       private dataSource: DataSource,
   ) {}
 
@@ -53,6 +55,7 @@ export class OrdersService {
       }
 
       await queryRunner.commitTransaction();
+      await this.alertService.handleLowStockAlerts()
       return savedOrder;
     } catch (err) {
       await queryRunner.rollbackTransaction();
@@ -100,6 +103,27 @@ export class OrdersService {
           product: orderItem.product,
           productId: orderItem.product.id,
           type: TransactionType.OUT,
+          quantity: orderItem.quantity,
+        });
+        await this.transactionRepository.save(transaction);
+      }
+    }
+
+    // Check if the status is changing to CANCELED
+    if (order.status !== OrderStatus.CANCELED && updateOrderStatusDto.status === OrderStatus.CANCELED) {
+      for (const orderItem of order.orderItems) {
+        // Restore stock
+        const product = await this.productRepository.findOne({ where: { id: orderItem.product.id } });
+        if (product) {
+          product.stock += orderItem.quantity;
+          await this.productRepository.save(product);
+        }
+
+        // Create an "IN" transaction
+        const transaction = this.transactionRepository.create({
+          product: orderItem.product,
+          productId: orderItem.product.id,
+          type: TransactionType.IN,
           quantity: orderItem.quantity,
         });
         await this.transactionRepository.save(transaction);

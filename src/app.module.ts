@@ -9,6 +9,7 @@ import {ScheduleModule} from "@nestjs/schedule";
 import { AlertsService } from './alerts/alerts.service';
 import { AlertsModule } from './alerts/alerts.module';
 import { MailModule } from './mail/mail.module';
+import {DataSource} from "typeorm";
 
 @Module({
     imports: [
@@ -39,4 +40,7 @@ import { MailModule } from './mail/mail.module';
     ],
     providers: [AlertsService],
 })
-export class AppModule {}
+export class AppModule {
+    constructor(private dataSource:DataSource) {
+    }
+}

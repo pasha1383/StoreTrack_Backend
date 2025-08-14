@@ -13,6 +13,7 @@ async function bootstrap() {
   const port = configService.get<number>('APP_PORT', 3000);
   console.log("this is port ",port)
 
+  app.enableCors();
   app.use(cookieParser());
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true, // Strips away properties that are not defined in the DTO

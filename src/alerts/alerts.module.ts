@@ -8,11 +8,12 @@ import {OrderItem} from "../orders/entities/order-item.entity";
 import {Report} from "../reports/entities/report.entity";
 import {ReportsService} from "../reports/reports.service";
 import {MailService} from "../mail/mail.service";
+import {User} from "../auth/entities/user.entity";
 
 @Module({
     imports: [
         ReportsModule,
-        TypeOrmModule.forFeature([Product,Report,OrderItem]),
+        TypeOrmModule.forFeature([Product,Report,OrderItem,User]),
     ],
     providers: [AlertsService,ReportsService,MailService],
     exports: [AlertsService],

@@ -1,23 +1,24 @@
 // src/products/products.service.ts
-import {ConflictException, Injectable, NotFoundException, UnauthorizedException} from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException
+} from '@nestjs/common';
+import { DataSource } from 'typeorm';
 
 import { CreateProductDto } from './dto/create-product.dto';
-import {Product} from "./entities/product.entity";
-import {Transaction, TransactionType} from "./entities/transaction.entity";
+import { Product } from './entities/product.entity';
+import { Transaction, TransactionType } from './entities/transaction.entity';
+import { UpdateProductDto } from "./dto/update-product.dto";
 
 @Injectable()
 export class ProductsService {
-  constructor(
-      @InjectRepository(Product)
-      private productRepository: Repository<Product>,
-      @InjectRepository(Transaction)
-      private transactionRepository: Repository<Transaction>,
-  ) {}
+  constructor(private dataSource: DataSource) {}
 
   async findAll(search?: string, sort?: 'newest' | 'price_asc' | 'price_desc', category?: string): Promise<Product[]> {
-    const queryBuilder = this.productRepository.createQueryBuilder('product');
+    const queryBuilder = this.dataSource.getRepository(Product).createQueryBuilder('product');
 
     if (search) {
       queryBuilder.where('product.name LIKE :search OR product.category LIKE :search', { search: `%${search}%` });
@@ -47,53 +48,98 @@ export class ProductsService {
   }
 
   async findOne(id: number): Promise<Product> {
-    let user = await this.productRepository.findOne({ where: { id } });
-    if (!user) {
-      throw new UnauthorizedException();
+    const product = await this.dataSource.getRepository(Product).findOne({ where: { id } });
+    if (!product) {
+      throw new NotFoundException(`Product with ID ${id} not found`);
     }
-    return user;
+    return product;
   }
 
   async create(createProductDto: CreateProductDto): Promise<Product> {
-    const newProduct = this.productRepository.create(createProductDto);
-    const result = await this.productRepository.save(newProduct);
-    const newTransaction = this.transactionRepository.create({
-      product: result,
-      productId: result.id,
-      type:TransactionType.IN,
-      quantity:result.stock,
-    });
-    await this.transactionRepository.save(newTransaction);
-    return result;
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const productRepository = queryRunner.manager.getRepository(Product);
+      const transactionRepository = queryRunner.manager.getRepository(Transaction);
+
+      const newProduct = productRepository.create(createProductDto);
+      const result = await productRepository.save(newProduct);
+
+      const newTransaction = transactionRepository.create({
+        product: result,
+        productId: result.id,
+        type: TransactionType.IN,
+        quantity: result.stock,
+      });
+      await transactionRepository.save(newTransaction);
+      await queryRunner.commitTransaction();
+      return result;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
-  async update(id: number, updateProductDto: Partial<Product>): Promise<Product> {
-    if (updateProductDto.name) {
-      const existingProduct = await this.productRepository.findOne({ where: { name: updateProductDto.name } });
-      if (existingProduct) {
-        throw new ConflictException(`Product Name with Name ${updateProductDto.name} already exists`);
+  async update(id: number, updateProductDto: Partial<UpdateProductDto>): Promise<Product> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const productRepository = queryRunner.manager.getRepository(Product);
+      const transactionRepository = queryRunner.manager.getRepository(Transaction);
+
+      const existingProduct = await productRepository.findOne({ where: { id } });
+      if (!existingProduct) {
+        throw new NotFoundException(`Product with ID ${id} not found`);
       }
+
+      const updatedStock = updateProductDto.stock ?? existingProduct.stock;
+      const stockDifference = updatedStock - existingProduct.stock;
+
+      await productRepository.update(id, updateProductDto);
+
+      if (stockDifference !== 0) {
+        const transactionType = stockDifference > 0 ? TransactionType.IN : TransactionType.OUT;
+        const transaction = transactionRepository.create({
+          product: existingProduct,
+          productId: existingProduct.id,
+          type: transactionType,
+          quantity: Math.abs(stockDifference),
+        });
+        await transactionRepository.save(transaction);
+      }
+      await queryRunner.commitTransaction();
+      return this.findOne(id);
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
     }
-    await this.productRepository.update(id, updateProductDto);
-    return this.findOne(id);
   }
 
   async remove(id: number): Promise<void> {
-    let removedProduct = await this.productRepository.delete(id);
-    if (removedProduct.affected === 0) {
-      throw new NotFoundException("Product Not Found");
+    try {
+      const productRepository = this.dataSource.getRepository(Product);
+      const transactionRepository =  this.dataSource.getRepository(Transaction);
+      const deletedTransaction = await transactionRepository.delete({productId : id});
+      const product = await productRepository.findOne({ where: { id } });
+      if (!product) {
+        throw new NotFoundException(`Product with ID ${id} not found`);
+      }
+      await productRepository.delete(id);
+    } catch (error) {
+      console.error(error);
+      throw new BadRequestException("Product Not Found");
     }
   }
 
   async getProductHistory(id: number): Promise<Transaction[]> {
-    return this.transactionRepository.find({ where: { productId: id } });
-  }
-
-  async search(search?: string): Promise<Product[]> {
-    const query = this.productRepository.createQueryBuilder('product');
-    if (search) {
-      query.where('product.name LIKE :search OR product.category LIKE :search', { search: `%${search}%` });
-    }
-    return query.getMany();
+    return this.dataSource.getRepository(Transaction).find({ where: { productId: id } });
   }
 }

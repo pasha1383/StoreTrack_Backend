@@ -35,6 +35,7 @@ export class ProductsController {
 
   @Delete(':id')
   async remove(@Param('id',ParseIntPipe) id: number) {
+    console.log("removeProduct", id);
     await this.productsService.remove(id);
     return {
       message: `Product With ID ${id} Deleted`,
@@ -46,9 +47,5 @@ export class ProductsController {
     return this.productsService.getProductHistory(id);
   }
 
-  @Get()
-  search(@Query('search') search: string) {
-    return this.productsService.search(search);
-  }
 
 }

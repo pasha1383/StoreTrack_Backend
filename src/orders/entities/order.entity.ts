@@ -3,7 +3,7 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn } f
 import { OrderItem } from './order-item.entity';
 import {OrderStatus} from "../order.status.enum";
 
-@Entity()
+@Entity('orders')
 export class Order {
     @PrimaryGeneratedColumn()
     id: number;

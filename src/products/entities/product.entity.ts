@@ -19,7 +19,11 @@ export class Product {
     @Column()
     category: string;
 
-    @OneToMany(() => Transaction, transaction => transaction.product)
+    @OneToMany(
+        () => Transaction,
+        transaction => transaction.product,
+        {cascade:true}
+    )
     transactions: Transaction[];
 
     @CreateDateColumn()
